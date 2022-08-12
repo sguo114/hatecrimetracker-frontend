@@ -1,121 +1,144 @@
-import moment from 'moment';
-import { useState, useEffect } from 'react';
-import { Card, CardBody, CardHeader, CardTitle } from 'reactstrap';
-import { ComposedChart, Area, Bar, Legend, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { ThemeColors } from '@src/utility/context/ThemeColors'
+import * as am4core from '@amcharts/amcharts4/core'
+import * as am4charts from '@amcharts/amcharts4/charts'
+import am4themes_animated from '@amcharts/amcharts4/themes/animated'
+import { Card, CardBody, CardHeader, CardTitle } from 'reactstrap'
+import React, { useEffect, useLayoutEffect, useState, useContext } from 'react'
 import { stateFullName } from '../utility/Utils';
 import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
-import './IncidentChartNoData.css'
-import Button from 'reactstrap/lib/Button';
 
-const IncidentChart = ({ color, chart_data, state, isFirstLoadData }) => {
-  const formatXAxis = (tickVal) => { //yyyy-mm-dd to mm/dd/2021
-    const d = moment(tickVal, "YYYY-MM-DD")
-    return d.format("M/D/YY");
-  }
-  const { t } = useTranslation();
-  const [xticks, setXTicks] = useState([]);
-  const [totalCases, setTotalCases] = useState(0);
-  const [tooltip, setTooltip] = useState(); //decide which tooltip to show
-  useEffect(() => {
-    const newXTicks = [];
-    let total = 0;
-    for (let i = 0; i < chart_data.length; i++) {
-      total += chart_data[i].value;
-      const d = moment(chart_data[i].key, "YYYY-MM-DD")
-      //if total dates>6M, show ticks at first day of each month
-      //if between 3M-6M show on 15th of each month too
-      //if <3M, show 8th, 22nd too
-      switch (d.date()) {
-        case 1:
-          newXTicks.push(chart_data[i].key);
-          break;
-        case 15:
-          if (chart_data.length <= 180) {
-            newXTicks.push(chart_data[i].key);
-          }
-          break;
-        case 8:
-        case 22:
-          if (chart_data.length <= 90) {
-            newXTicks.push(chart_data[i].key);
-          }
-          break;
-      }
+am4core.useTheme(am4themes_animated)
+
+/*
+Example comes from here
+https://www.amcharts.com/docs/v4/getting-started/integrations/using-react/
+*/
+
+//chartData is result from ___
+const IncidentChartTrial = ({chart_data, state, isFirstLoadData}) => {
+    const { t } = useTranslation();
+    const [totalCases, setTotalCases] = useState(0);
+    const [chartData, setChartData] = useState();
+    
+    const updateChart = (data) => {
+        if(!chartData) return 
+        chartData.data = data
+
+        let total = 0
+        for(let i = 0; i<data.length; i++){
+            total += data[i].value
+        }
+        setTotalCases(total)
     }
-    setXTicks(newXTicks);
-    setTotalCases(total);
-  }, [chart_data]);
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload[0] && payload[0].value) {
-      const d = moment(payload[0].payload.key, "YYYY-MM-DD")
-      const monthly = payload[0].payload.monthly_cases;
-      const daily = payload[0].payload.value ? payload[0].payload.value : 0;
-      return tooltip !== 'daily' ? (
-        <div className='recharts-custom-tooltip'>
-          <p>{d.format("MMM YYYY")}</p>
-          <p><strong>{t("incident_chart.total_monthly_cases", { count: monthly })}</strong></p>
-        </div>
-      ) :
-        (
-          <div className='recharts-custom-tooltip'>
-            <p>{d.format("M/D/YYYY")}</p>
-            <p><strong>{t("incident_chart.total_daily_cases", { count: daily })}</strong></p>
-            <p><strong>{t("incident_chart.total_monthly_cases", { count: monthly })}</strong></p>
-          </div>
-        )
-    }
-    return null
-  }
-  return (
-    <Card>
-      <CardHeader>
+
+    useEffect(()=>{
+        updateChart(chart_data)
+    }, [chart_data])
+    
+    useLayoutEffect(() => {
+        // Create chart instance
+        let chart = am4core.create("charttrial", am4charts.XYChart)
+
+        // Create date axes and value axes
+        let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+    
+        let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "Daily Count";
+        valueAxis.min = 0;
+        valueAxis.title.fontWeight = 600;
+
+        let valueAxis2 = chart.yAxes.push(new am4charts.ValueAxis());
+        valueAxis2.title.text = "Monthly Count";
+        valueAxis2.min = 0
+        valueAxis2.title.fontWeight = 600;
+        valueAxis2.renderer.opposite = true;
+
+        // Setting up toolTipText
+        let toolTipText = `{key}
+        [bold]Monthly Cases: {monthly_cases}
+        [bold]Daily Cases: {value}`
+
+        // Create series (the data sets)
+        let series1 = chart.series.push(new am4charts.LineSeries());
+        series1.dataFields.valueY = "monthly_cases";
+        series1.dataFields.dateX = "key";
+        series1.name = "Monthly Cases";
+        series1.tooltipText = `{key}
+        [bold]Monthly Cases: {monthly_cases}`;
+        series1.yAxis = valueAxis2;
+        series1.fillOpacity = 0.4;
+
+        let series2 = chart.series.push(new am4charts.ColumnSeries());
+        series2.dataFields.valueY = "value";
+        series2.dataFields.dateX = "key";
+        series2.name = "Daily Cases";
+        // series2.tooltipText = toolTipText;
+        series2.columns.template.tooltipText = `{key}
+        [bold]Daily Cases: {value}`;
+        chart.tooltip.label.fill = am4core.color("#f00");
+        series2.clustered = true;
+        series2.fill = am4core.color("yellow");
+        series2.stroke = am4core.color("yellow");
+        series2.columns.template.width = am4core.percent(80);
+
+        // chart cursor on 
+        chart.cursor = new am4charts.XYCursor();
+        chart.cursor.lineX.disabled = false;
+        chart.cursor.lineY.disabled = false;
+
+        // chart legend
+        chart.legend = new am4charts.Legend();
+        chart.legend.useDefaultMarker = false;
+        let marker = chart.legend.markers.template.children.getIndex(0);
+        marker.cornerRadius(12, 12, 12, 12);
+        marker.strokeWidth = 2;
+        marker.strokeOpacity = 1;
+        marker.stroke = am4core.color("#ccc");
+        series1.legendSettings.labelText = "Monthly Cases [bold {color}]{value}[/]";
+        series2.legendSettings.labelText = "Daily Cases [bold {color}]{value}[/]";
+
+        // Set the data for the chart: set chartData state to chart. chartData will update to chart_data passed in, w/ updateChart fnc
+        setChartData(chart)
+        return () => {
+            chart.dispose()
+        }
+    }, [])
+    
+    return (
         <div>
-          <CardTitle tag='h4'>
-            {t("incident_chart.trend")}&nbsp;-&nbsp;
-            {(totalCases > 0) ? t("incident_chart.total_cases", { count: totalCases })
-              : t("incident_chart.no_data")
-            }
-            {state ? " : " + stateFullName(state) : ""}
-          </CardTitle>
+            <Card>
+                <CardHeader>
+                    <div>
+                        <CardTitle tag='h4'>
+                            {t("incident_chart.trend")}&nbsp;-&nbsp;
+                            {(totalCases > 0) ? t("incident_chart.total_cases", { count: totalCases })
+                            : t("incident_chart.no_data")
+                            }
+                            {state ? " : " + stateFullName(state) : ""}
+                        </CardTitle>
+                    </div>
+                </CardHeader>
+                <CardBody>
+                <div className='recharts-wrapper'>
+                    {(totalCases === 0 && !isFirstLoadData) ?  (
+                        <>
+                        <p className='add-data-button'>
+                            <Trans i18nKey='no_data_please_report'>
+                            There is no data collected in the selected location and date range yet. Please click 
+                                <a href='https://forms.gle/HRkVKW2Sfp7BytXj8' target='_blank'>here</a>
+                                to report incidents to us.
+                            </Trans>
+                        </p>
+                        <div className='drop-down'/>
+                        </>
+                    ) : null}
+                    <div id='charttrial' style={{ width: '100%', height: '400px' }}></div>
+                </div>
+                </CardBody>
+            </Card>
         </div>
-      </CardHeader>
-
-      <CardBody>
-        <div className='recharts-wrapper'>
-          {(totalCases === 0 && !isFirstLoadData) ?  (
-            <>
-              <p className='add-data-button'>
-                <Trans i18nKey='no_data_please_report'>
-                  There is no data collected in the selected location and date range yet. Please click 
-                    <a href='https://forms.gle/HRkVKW2Sfp7BytXj8' target='_blank'>here</a>
-                    to report incidents to us.
-                </Trans>
-              </p>
-              <div className='drop-down'/>
-            </>
-          ) : null}
-          <ResponsiveContainer>
-            <ComposedChart height={300} data={chart_data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey='key' tickFormatter={formatXAxis} interval="preserveStartEnd" ticks={xticks} />
-              <YAxis allowDecimals={false} orientation="left" interval="preserveStartEnd"
-                type="number"
-                domain={[0, 'dataMax + 3']}
-                label={{ value: t("daily_count"), angle: -90, position: 'insideLeft' }} />
-              <YAxis yAxisId="right" orientation="right" allowDecimals={false} interval="preserveStartEnd"
-                label={{ value: t("monthly_count"), angle: 90, position: 'insideRight' }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area name={t("monthly_count")} type="monotone" dataKey="monthly_cases" fill="#8884d8" stroke="#8884d8" yAxisId="right"
-                onMouseOver={() => setTooltip('monthly')} />
-              <Bar name={t("daily_count")} dataKey='value' stroke={chart_data.length > 60 ? color : undefined} fill={color} strokeWidth={3}
-                onMouseOver={() => setTooltip('daily')} />
-              <Legend wrapperStyle={{ position: 'relative', marginTop: '4px' }} />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-      </CardBody>
-    </Card>
-  )
+    )
 }
-export default IncidentChart
+
+export default IncidentChartTrial
