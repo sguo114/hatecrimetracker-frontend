@@ -26,6 +26,7 @@ import DateRangeSelector from './DateRangeSelector';
 import IncidentCountTable from './IncidentCountTable';
 import IncidentList from './IncidentList';
 import IncidentMap from './IncidentMap';
+import IncidentChartTrial from './IncidentChartTrial';
 import StateSelection from './StateSelection';
 import { useRouter } from '@hooks/useRouter';
 import { isObjEmpty } from '@utils';
@@ -325,9 +326,25 @@ const Home = () => {
           <Row className='match-height'>
             <Col xl='8' lg='6' md='12'>
               <div>
+<<<<<<< Updated upstream
                 {isShowPer10kAsian ? 
                   <IncidentChartPer10kAsian color={colors.primary.main} monthly_stats={monthlyCount} state={selectedState} date_range={dateRange} isFirstLoadData={isFirstLoadData}/> 
                   : <IncidentChart color={colors.primary.main} chart_data={incidentTimeSeries} state={selectedState} isFirstLoadData={isFirstLoadData}/>}
+=======
+                {/* <IncidentChart
+                  className="behind-relative"
+                  color={colors.primary.main}
+                  chart_data={incidentTimeSeries}
+                  state={selectedState}
+                  isFirstLoadData={isFirstLoadData}
+                /> */}
+                <IncidentChartTrial
+                  className="behind-relative"
+                  chart_data={incidentTimeSeries}
+                  state={selectedState}
+                  isFirstLoadData={isFirstLoadData}
+                />
+>>>>>>> Stashed changes
                 <IncidentMap
                   mapData={incidentAggregated}
                   selectedState={selectedState}
