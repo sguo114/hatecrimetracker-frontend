@@ -2,13 +2,13 @@ import moment from 'moment';
 import { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader, CardTitle } from 'reactstrap';
 import { ComposedChart, Area, Bar, Legend, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { stateFullName } from '../../utility/Utils';
+import { stateFullName } from '../utility/Utils';
 import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import './IncidentChartNoData.css'
 import Button from 'reactstrap/lib/Button';
 
-const IncidentChart = ({ color, chart_data, state, isFirstLoadData }) => {
+const IncidentChartOld = ({ color, chart_data, state, isFirstLoadData }) => {
   const formatXAxis = (tickVal) => { //yyyy-mm-dd to mm/dd/2021
     const d = moment(tickVal, "YYYY-MM-DD")
     return d.format("M/D/YY");
@@ -118,4 +118,4 @@ const IncidentChart = ({ color, chart_data, state, isFirstLoadData }) => {
     </Card>
   )
 }
-export default IncidentChart
+export default IncidentChartOld

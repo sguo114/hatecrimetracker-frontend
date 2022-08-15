@@ -20,13 +20,13 @@ import {
 } from 'reactstrap';
 import 'rsuite/dist/styles/rsuite-dark.css';
 import * as incidentsService from '../services/incidents';
-import IncidentChart from './IncidentChart';
+import IncidentChartOld from './IncidentChartOld';
 import IncidentChartPer10kAsian from './IncidentChartPer10kAsian';
 import DateRangeSelector from './DateRangeSelector';
 import IncidentCountTable from './IncidentCountTable';
 import IncidentList from './IncidentList';
 import IncidentMap from './IncidentMap';
-import IncidentChartTrial from './IncidentChartTrial';
+import IncidentChartTrial from './IncidentChart';
 import StateSelection from './StateSelection';
 import { useRouter } from '@hooks/useRouter';
 import { isObjEmpty } from '@utils';
@@ -38,11 +38,13 @@ import { withRouter } from 'react-router-dom';
 import Head from './components/head';
 import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
+import DataDisplaySwitcher from './DataDisplaySwitcher'
 import './Home.css'
 import { RiShareForwardFill } from 'react-icons/ri';
 import SocialMedia from './components/social-media'
 import SocialMediaPopup from './components/social-media-pop-up'
 import DataDisplaySwitcher from './DataDisplaySwitcher'
+
 
 const Home = () => {
   const router = useRouter();
@@ -260,12 +262,14 @@ const Home = () => {
             <Col xs='12'>
               <Container className='header'>
                 <Row className='align-items-center'>
+
                 <Col xs='12' sm='12' md='8'>
                     <p className='title'>
                       <img src={logo} alt='logo' className='logo'  />{' '}
                       {t('website.name')}
                     </p>
                   </Col>
+
                   <Col xs='12' sm='12' md='4'>
                     <div className="OneRowItem d-flex align-items-center justify-content-md-end justify-content-xs-between justify-content-sm-between py-1">
                     {deviceSize >= 786 && <> 
@@ -283,6 +287,7 @@ const Home = () => {
                       {t('contact_us')}
                     </a>
                     &nbsp;&nbsp;&nbsp;&nbsp;
+                    
                     <SelectPicker
                       data={support_languages}
                       searchable={false}
@@ -326,31 +331,21 @@ const Home = () => {
           <Row className='match-height'>
             <Col xl='8' lg='6' md='12'>
               <div>
-<<<<<<< Updated upstream
-                {isShowPer10kAsian ? 
-                  <IncidentChartPer10kAsian color={colors.primary.main} monthly_stats={monthlyCount} state={selectedState} date_range={dateRange} isFirstLoadData={isFirstLoadData}/> 
-                  : <IncidentChart color={colors.primary.main} chart_data={incidentTimeSeries} state={selectedState} isFirstLoadData={isFirstLoadData}/>}
-=======
-                {/* <IncidentChart
-                  className="behind-relative"
-                  color={colors.primary.main}
-                  chart_data={incidentTimeSeries}
-                  state={selectedState}
-                  isFirstLoadData={isFirstLoadData}
-                /> */}
                 <IncidentChartTrial
                   className="behind-relative"
                   chart_data={incidentTimeSeries}
                   state={selectedState}
                   isFirstLoadData={isFirstLoadData}
                 />
->>>>>>> Stashed changes
+                {isShowPer10kAsian ? 
+                  <IncidentChartPer10kAsian color={colors.primary.main} monthly_stats={monthlyCount} state={selectedState} date_range={dateRange}/> 
+                  : <IncidentChart color={colors.primary.main} chart_data={incidentTimeSeries} state={selectedState}/>}
                 <IncidentMap
                   mapData={incidentAggregated}
                   selectedState={selectedState}
                   lang={i18n.language}
-                  stateToggled={stateToggled}
                   showPer10KAsian={isShowPer10kAsian}
+                  onChange={setSelectedState}
                 />
                 <IncidentCountTable
                   title={'Incident Count by State'}
