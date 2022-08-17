@@ -43,7 +43,7 @@ import './Home.css'
 import { RiShareForwardFill } from 'react-icons/ri';
 import SocialMedia from './components/social-media'
 import SocialMediaPopup from './components/social-media-pop-up'
-import DataDisplaySwitcher from './DataDisplaySwitcher'
+import IncidentChartPer10kAsianTrial from './IncidentChartPer10kAsianTrial';
 
 
 const Home = () => {
@@ -125,6 +125,7 @@ const Home = () => {
     }
     return new_stats;
   };
+
   const loadData = (updateMap = false) => {
     if (dateRange?.length != 2) return;
 
@@ -178,6 +179,7 @@ const Home = () => {
     );
     return cururl !== newurl;
   };
+
   const saveHistory = () => {
     if (!dateRange) return;
     //if date ranger or state is changed, save in router history
@@ -205,12 +207,14 @@ const Home = () => {
       setDateRange(defaultDateRange);
     }
   }, [router]);
+
   useEffect(() => {
     // console.log("selectedState:" + selectedState)
     changeLanguage(selectedLangCode);
     loadData();
     saveHistory();
   }, [selectedState, selectedLangCode]);
+
   //update both incidents and map
   useEffect(() => {
     loadData(true);
@@ -223,6 +227,7 @@ const Home = () => {
     window.addEventListener("resize", resizeW); // Update the width on resize
     return () => window.removeEventListener("resize", resizeW);
   });
+
   const { colors } = useContext(ThemeColors);
 
   // handle date change
@@ -238,6 +243,8 @@ const Home = () => {
     // console.log("Toggle state:" + state + " selectedState:" + selectedState + " new state:" + newState)
     setSelectedState(newState);
   }
+
+  // console.log('monthly stats:', monthlyCount, 'dateRange', dateRange, 'chartdata', incidentTimeSeries)
 
   return (
     <>
@@ -331,15 +338,27 @@ const Home = () => {
           <Row className='match-height'>
             <Col xl='8' lg='6' md='12'>
               <div>
-                <IncidentChartTrial
-                  className="behind-relative"
-                  chart_data={incidentTimeSeries}
-                  state={selectedState}
-                  isFirstLoadData={isFirstLoadData}
-                />
+              {/* {isShowPer10kAsian ? 
+                  <IncidentChartPer10kAsian color={colors.primary.main} monthly_stats={monthlyCount} state={selectedState} date_range={dateRange}/> 
+                  : <IncidentChartTrial color={colors.primary.main} chart_data={incidentTimeSeries} isFirstLoadDate = {isFirstLoadData} state={selectedState}/>} */}
+                
+                {isShowPer10kAsian ? 
+                <IncidentChartPer10kAsianTrial
+                color={colors.primary.main}
+                monthly_stats={monthlyCount}
+                date_range={dateRange}
+                state={selectedState}
+                isFirstLoadData={isFirstLoadData}
+              /> :  <IncidentChartTrial
+                color={colors.primary.main}
+                chart_data={incidentTimeSeries}
+                state={selectedState}
+                isFirstLoadData={isFirstLoadData}
+              />}
+                
                 {isShowPer10kAsian ? 
                   <IncidentChartPer10kAsian color={colors.primary.main} monthly_stats={monthlyCount} state={selectedState} date_range={dateRange}/> 
-                  : <IncidentChart color={colors.primary.main} chart_data={incidentTimeSeries} state={selectedState}/>}
+                  : <IncidentChartOld color={colors.primary.main} chart_data={incidentTimeSeries} state={selectedState}/>}
                 <IncidentMap
                   mapData={incidentAggregated}
                   selectedState={selectedState}
