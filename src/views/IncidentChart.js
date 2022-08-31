@@ -81,7 +81,7 @@ const IncidentChart = ({color, chart_data, state, isFirstLoadData}) => {
         series2.clustered = true;
         series2.fill = am4core.color(color);
         series2.stroke = am4core.color(color);
-        series2.columns.template.width = am4core.percent(80);
+        series2.columns.template.width = am4core.percent(70);
 
         // chart cursor on 
         chart.cursor = new am4charts.XYCursor();
