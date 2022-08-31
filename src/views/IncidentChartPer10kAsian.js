@@ -1,23 +1,30 @@
 import * as dateFns from 'date-fns';
-import { useState, useEffect } from 'react';
-import { Card, CardBody, CardHeader, CardTitle } from 'reactstrap';
-import { BarChart, Bar, Legend, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import * as am4core from '@amcharts/amcharts4/core'
+import * as am4charts from '@amcharts/amcharts4/charts'
+import am4themes_animated from '@amcharts/amcharts4/themes/animated'
+import { Card, CardBody, CardHeader, CardTitle } from 'reactstrap'
+import React, { useEffect, useLayoutEffect, useState, useContext } from 'react'
 import { stateFullName, getStateIncidentPer10kAsian, formatIncidentRate } from '../utility/Utils';
 import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+
+am4core.useTheme(am4themes_animated)
+
+/*
+Example comes from here
+https://www.amcharts.com/docs/v4/getting-started/integrations/using-react/
+*/
+
+//chartData is result from ___
 
 // monthly_data={'2021-01':100, '2021-02': 50...}
-const IncidentChartPer10kAsian = ({ color, monthly_stats, date_range, state }) => {
-    const formatXAxis = (tickVal) => {
-        const d = dateFns.parse(tickVal, "yyyy-MM", new Date())
-        return dateFns.format(d, "M/yyyy");
-    }
-
+const IncidentChartPer10kAsian = ({ color, monthly_stats, date_range, state , isFirstLoadData}) => {
     const [monthlyData, setMonthlyData] = useState([])
     const { t } = useTranslation();
-    const [totalCases, setTotalCases] = useState(0);
+    const [totalCases, setTotalCases] = useState(0);  
 
-    useEffect(() => {
-        //calc incident ration per 10k asian
+    useLayoutEffect(() => {
+        // prepare data  in monthly_data
         let monthly_data = [];
         let startDate = dateFns.set(date_range[0], {date:1}); //set to first day of the month
         let lastDate = dateFns.set(date_range[1], {date:1});
@@ -41,59 +48,102 @@ const IncidentChartPer10kAsian = ({ color, monthly_stats, date_range, state }) =
                 })
             }            
         }
-        setMonthlyData(monthly_data);
-        setTotalCases(total);
-    }, [monthly_stats]);
+        setTotalCases(total)
 
-    const CustomTooltip = ({ active, payload }) => {
-        if (active && payload && payload[0] && payload[0].value) {
-        const d = dateFns.parse(payload[0].payload.key, "yyyy-MM", new Date())
-        const monthly = payload[0].payload.cases;
-        const monthly_10k_asian = payload[0].payload.cases_per_10k;
-        return (
-            <div className='recharts-custom-tooltip'>
-            <p>{dateFns.format(d, "MMM yyyy")}</p>
-            <p><strong>{t("incident_chart.total_monthly_cases_per_10k_Asian", { count: monthly })}</strong></p>
-            <p><strong>{t("incident_map.count_10k_asian") + " : " + monthly_10k_asian }</strong></p>
-            </div>
-        )
+        // Create chart instance
+        let chart2 = am4core.create("charttrial2", am4charts.XYChart)
+        chart2.data = monthly_data
+        
+        let dateAxis2 = chart2.xAxes.push(new am4charts.DateAxis());
+        dateAxis2.renderer.grid.template.stroke = "white";
+        dateAxis2.renderer.grid.template.strokeWidth = 1; 
+        dateAxis2.renderer.grid.template.strokeOpacity = .2;
+        dateAxis2.renderer.grid.template.strokeDasharray = "3,3"
+        dateAxis2.dateFormats.setKey("week", "M/yyyy");
+        dateAxis2.periodChangeDateFormats.setKey("week", "M/yyyy");
+        dateAxis2.dateFormats.setKey("month", "M/yyyy");
+        dateAxis2.periodChangeDateFormats.setKey("month", "M/yyyy");
+    
+        let valueAxis3 = chart2.yAxes.push(new am4charts.ValueAxis());
+        valueAxis3.title.text = t("monthly_per_10k_asian");
+        valueAxis3.min = 0;
+        valueAxis3.title.fontWeight = 600;
+        valueAxis3.renderer.grid.template.stroke = "white";
+        valueAxis3.renderer.grid.template.strokeWidth = 1; 
+        valueAxis3.renderer.grid.template.strokeOpacity = .2;
+        valueAxis3.renderer.grid.template.strokeDasharray = "3,3";
+
+        // Setting up toolTipText
+        let toolTipText2 = `{key}
+        [bold]Monthly Cases: {cases_per_10k}`
+
+        // Create series (the data sets)
+        let series3 = chart2.series.push(new am4charts.ColumnSeries());
+        series3.dataFields.valueY = "cases_per_10k";
+        series3.dataFields.dateX = "key";
+        series3.name = t("monthly_per_10k_asian");
+        series3.tooltipText = `{key}
+        [bold]Monthly Cases: {cases_per_10k}`;
+        series3.yAxis = valueAxis3;
+        series3.clustered = true;
+        series3.fill = am4core.color(color);
+        series3.stroke = am4core.color(color);
+
+        // chart cursor on 
+        chart2.cursor = new am4charts.XYCursor();
+        chart2.cursor.lineX.disabled = false;
+        chart2.cursor.lineY.disabled = false;
+
+        // chart legend
+        chart2.legend = new am4charts.Legend();
+        chart2.legend.useDefaultMarker = false;
+        let markerTemplate2 = chart2.legend.markers.template;
+        markerTemplate2.children.getIndex(0).cornerRadius(.5,.5,.5,.5)
+        markerTemplate2.width = 12
+        markerTemplate2.height = 12
+        series3.legendSettings.labelText = "Monthly Cases [bold {color}]{value}[/]";    
+
+        setMonthlyData(chart2)
+        // console.log('chart2 data', chart2.data)
+        return () => {
+            chart2.dispose()
         }
-        return null
-    }
-    return (
-        <Card>
-        <CardHeader>
-            <div>
-            <CardTitle tag='h4'>
-                {t("incident_chart.trend")}&nbsp;-&nbsp;
-                {(totalCases > 0) ? t("incident_chart.total_cases", { count: totalCases })
-                : t("incident_chart.no_data")
-                }
-                {state ? " : " + stateFullName(state) : ""}
-            </CardTitle>
-            </div>
-        </CardHeader>
+    }, [monthly_stats, date_range])
 
-        <CardBody>
-            <div className='recharts-wrapper'>
-            <ResponsiveContainer>
-                <BarChart height={300} data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />                
-                <XAxis dataKey='key' tickFormatter={formatXAxis}/>
-                <YAxis orientation="left" interval="preserveStartEnd"
-                    type="number"
-                    tickCount={5} 
-                    allowDecimals={true}
-                    domain={[0, 'auto']}
-                    label={{ value: t("monthly_per_10k_asian"), angle: -90, position: 'insideLeft' }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar name={t("monthly_per_10k_asian")} dataKey='cases_per_10k' stroke={monthlyData.length > 60 ? color : undefined} fill={color} strokeWidth={3}/>
-                <Legend wrapperStyle={{ position: 'relative', marginTop: '4px' }} />
-                </BarChart>
-            </ResponsiveContainer>
-            </div>
-        </CardBody>   
-        </Card>
+        
+    return (
+        <div>
+            <Card>
+                <CardHeader>
+                    <div>
+                        <CardTitle tag='h4'>
+                            {t("incident_chart.trend")}&nbsp;-&nbsp;
+                            {(totalCases > 0) ? t("incident_chart.total_cases", { count: totalCases })
+                            : t("incident_chart.no_data")
+                            }
+                            {state ? " : " + stateFullName(state) : ""}
+                        </CardTitle>
+                    </div>
+                </CardHeader>
+                <CardBody>
+                <div className='recharts-wrapper'>
+                    {(totalCases === 0 && !isFirstLoadData) ?  (
+                        <>
+                        <p className='add-data-button'>
+                            <Trans i18nKey='no_data_please_report'>
+                            There is no data collected in the selected location and date range yet. Please click 
+                                <a href='https://forms.gle/HRkVKW2Sfp7BytXj8' target='_blank'>here</a>
+                                to report incidents to us.
+                            </Trans>
+                        </p>
+                        <div className='drop-down'/>
+                        </>
+                    ) : null}
+                    <div id='charttrial2' style={{ width: '100%', height: '400px' }}></div>
+                </div>
+                </CardBody>
+            </Card>
+        </div>
     )
 }
 export default IncidentChartPer10kAsian;

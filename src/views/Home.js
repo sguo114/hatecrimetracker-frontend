@@ -20,13 +20,11 @@ import {
 } from 'reactstrap';
 import 'rsuite/dist/styles/rsuite-dark.css';
 import * as incidentsService from '../services/incidents';
-import IncidentChartOld from './IncidentChartOld';
-import IncidentChartPer10kAsian from './IncidentChartPer10kAsian';
 import DateRangeSelector from './DateRangeSelector';
 import IncidentCountTable from './IncidentCountTable';
 import IncidentList from './IncidentList';
 import IncidentMap from './IncidentMap';
-import IncidentChartTrial from './IncidentChart';
+import IncidentChart from './IncidentChart';
 import StateSelection from './StateSelection';
 import { useRouter } from '@hooks/useRouter';
 import { isObjEmpty } from '@utils';
@@ -43,7 +41,7 @@ import './Home.css'
 import { RiShareForwardFill } from 'react-icons/ri';
 import SocialMedia from './components/social-media'
 import SocialMediaPopup from './components/social-media-pop-up'
-import IncidentChartPer10kAsianTrial from './IncidentChartPer10kAsianTrial';
+import IncidentChartPer10kAsian from './IncidentChartPer10kAsian';
 
 
 const Home = () => {
@@ -254,11 +252,6 @@ const Home = () => {
               <p className='floating-text'>Follow Us</p>
           </div>
         </div>
-        {/* <div className='wrapper-floatting-button'>
-          <div className='floating-button-bottom' onClick={() => setIsShare(true)}>
-              <p className='floating-text'>Share</p>
-          </div>
-        </div>  */}
         </>
       }
       {isShare && <SocialMediaPopup setIsSharing={() => {setIsShare(false)}} deviceSize={deviceSize}/>}
@@ -337,28 +330,20 @@ const Home = () => {
           </Row>
           <Row className='match-height'>
             <Col xl='8' lg='6' md='12'>
-              <div>
-              {/* {isShowPer10kAsian ? 
-                  <IncidentChartPer10kAsian color={colors.primary.main} monthly_stats={monthlyCount} state={selectedState} date_range={dateRange}/> 
-                  : <IncidentChartTrial color={colors.primary.main} chart_data={incidentTimeSeries} isFirstLoadDate = {isFirstLoadData} state={selectedState}/>} */}
-                
+              <div>                
                 {isShowPer10kAsian ? 
-                <IncidentChartPer10kAsianTrial
+                <IncidentChartPer10kAsian
                 color={colors.primary.main}
                 monthly_stats={monthlyCount}
                 date_range={dateRange}
                 state={selectedState}
                 isFirstLoadData={isFirstLoadData}
-              /> :  <IncidentChartTrial
+              /> :  <IncidentChart
                 color={colors.primary.main}
                 chart_data={incidentTimeSeries}
                 state={selectedState}
                 isFirstLoadData={isFirstLoadData}
               />}
-                
-                {isShowPer10kAsian ? 
-                  <IncidentChartPer10kAsian color={colors.primary.main} monthly_stats={monthlyCount} state={selectedState} date_range={dateRange}/> 
-                  : <IncidentChartOld color={colors.primary.main} chart_data={incidentTimeSeries} state={selectedState}/>}
                 <IncidentMap
                   mapData={incidentAggregated}
                   selectedState={selectedState}

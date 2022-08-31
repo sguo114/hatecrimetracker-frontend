@@ -3,13 +3,13 @@ import './DataDisplaySwitcher.css';
 
 const DataDisplaySwitcher = ({isShowPer10kAsian, onClick}) => {
     const TotalButton = () => {
-        console.log(isShowPer10kAsian)
+        // console.log(isShowPer10kAsian)
         if (isShowPer10kAsian === true) {
             onClick()
         }
     }
     const Per10KAsianButton = () => {
-        console.log(isShowPer10kAsian)
+        // console.log(isShowPer10kAsian)
         if (isShowPer10kAsian !== true) {
             onClick()
         }
