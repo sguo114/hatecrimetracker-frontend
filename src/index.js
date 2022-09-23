@@ -1,6 +1,6 @@
 // ** React Imports
 import { Suspense, lazy } from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 
 // ** Redux Imports
 import { Provider } from 'react-redux'
@@ -57,7 +57,10 @@ try {
 // ** Lazy load app
 const LazyApp = lazy(() => import('./App'))
 
-ReactDOM.render(
+const container = document.getElementById('root')
+const root = createRoot(container)
+
+root.render(
     <CookiesProvider>
         <UserProvider>
             <Provider store={store}>
@@ -69,8 +72,7 @@ ReactDOM.render(
                 </Suspense>
             </Provider>
         </UserProvider>
-    </CookiesProvider>,
-    document.getElementById('root')
+    </CookiesProvider>
 )
 
 // If you want your app to work offline and load faster, you can change

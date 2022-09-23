@@ -43,6 +43,38 @@ import SocialMedia from './components/social-media'
 import SocialMediaPopup from './components/social-media-pop-up'
 import IncidentChartPer10kAsian from './IncidentChartPer10kAsian';
 
+// import ionic react components
+import {
+  IonApp,
+  IonAlert,
+  IonCol,
+  IonContent,
+  IonGrid,
+  IonHeader,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonRow,
+  IonTitle,
+  IonToolbar,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonMenu,
+  IonIcon,
+  IonButton,
+  IonButtons,
+  IonMenuButton,
+  setupIonicReact,
+} from "@ionic/react";
+
+import { menuOutline } from "ionicons/icons";
+/* Core CSS required for Ionic components to work properly */
+import "@ionic/react/css/core.css";
+
+
+setupIonicReact();
 
 const Home = () => {
   const router = useRouter();
@@ -258,19 +290,27 @@ const Home = () => {
       <Head />
       <UILoader blocking={loading}>
         <div>
-          <Row>
-            <Col xs='12'>
+          <IonRow>
+            <IonCol xs='12'>
               <Container className='header'>
-                <Row className='align-items-center'>
-
-                <Col xs='12' sm='12' md='8'>
+                <IonHeader>
+                  <IonToolbar color='black'>
                     <p className='title'>
                       <img src={logo} alt='logo' className='logo'  />{' '}
                       {t('website.name')}
                     </p>
-                  </Col>
+                    <IonButtons slot="end">
+                    <IonMenuButton autoHide='false'>
+                      <IonIcon color='white' icon={menuOutline}></IonIcon>
+                    </IonMenuButton>
+                  </IonButtons>
+                  </IonToolbar>
+                  
+                </IonHeader>
+               
+                <IonRow className='align-items-center'>
 
-                  <Col xs='12' sm='12' md='4'>
+                  <IonCol xs='12' sm='12' md='4'>
                     <div className="OneRowItem d-flex align-items-center justify-content-md-end justify-content-xs-between justify-content-sm-between py-1">
                     {deviceSize >= 786 && <> 
                       <SocialMedia size={35}  bgStyle={{fill: "#000000"}} iconFillColor={"yellow"} />
@@ -297,20 +337,20 @@ const Home = () => {
                       onChange={(value) => setSelectedLang(value)}
                     />
                     </div>
-                  </Col>
-                </Row>
+                  </IonCol>
+                </IonRow>
 
                 <FormGroup>
-                  <Row>
-                    <Col xs='12' sm='12' md='auto' className='OneRowItem'>
+                  <IonRow>
+                    <IonCol xs='12' sm='12' md='auto' className='OneRowItem'>
                       <Label className='SimpleLabel'>{t('location')}:</Label>{' '}
                       <StateSelection
                         name='state'
                         value={selectedState}
                         onChange={setSelectedState}
                       />{' '}
-                    </Col>
-                    <Col xs='12' sm='12' md='auto' className='OneRowItem'>
+                    </IonCol>
+                    <IonCol xs='12' sm='12' md='auto' className='OneRowItem'>
                       <Label className='SimpleLabel'>{t('date_range')}:</Label>{' '}
                       <DateRangeSelector
                         name='date'
@@ -318,19 +358,26 @@ const Home = () => {
                         value={dateRange}
                         isMobile={isMobile}
                       />
-                    </Col>
-                    <Col xs='12' sm='12' md='auto' className='OneRowItem'>
+                    </IonCol>
+                    <IonCol xs='12' sm='12' md='auto' className='OneRowItem'>
                       <Label className='SimpleLabel'>{t('data_display')}:</Label>{' '}
                       <DataDisplaySwitcher isShowPer10kAsian={isShowPer10kAsian} onClick={() => setIsShowPer10kAsian(!isShowPer10kAsian)} />
-                    </Col>
-                  </Row>
+                    </IonCol>
+                  </IonRow>
                 </FormGroup>
               </Container>
-            </Col>
-          </Row>
-          <Row className='match-height'>
-            <Col xl='8' lg='6' md='12'>
-              <div>                
+            </IonCol>
+          </IonRow>
+          <IonRow className='match-height'>
+            <IonCol xl='8' lg='6' md='12'>
+              <div>            
+              <IncidentMap
+                  mapData={incidentAggregated}
+                  selectedState={selectedState}
+                  lang={i18n.language}
+                  showPer10KAsian={isShowPer10kAsian}
+                  onChange={setSelectedState}
+                />    
                 {isShowPer10kAsian ? 
                 <IncidentChartPer10kAsian
                 color={colors.primary.main}
@@ -344,13 +391,6 @@ const Home = () => {
                 state={selectedState}
                 isFirstLoadData={isFirstLoadData}
               />}
-                <IncidentMap
-                  mapData={incidentAggregated}
-                  selectedState={selectedState}
-                  lang={i18n.language}
-                  showPer10KAsian={isShowPer10kAsian}
-                  onChange={setSelectedState}
-                />
                 <IncidentCountTable
                   title={'Incident Count by State'}
                   data={incidentAggregated}
@@ -358,31 +398,31 @@ const Home = () => {
                   stateToggled={stateToggled}
                 />
               </div>
-            </Col>
-            <Col xl='4' lg='6' md='12'>
-              <Card>
+            </IonCol>
+            <IonCol xl='4' lg='6' md='12'>
+              <IonCard color='dark'>
                 {/* <CardHeader>
                             <CardTitle>Hate Crime Incidents</CardTitle>
                         </CardHeader> */}
-                <CardBody>
+                <IonCardContent>
                   <IncidentList data={incidents} />
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+          </IonRow>
         </div>
         <div className='footer'>
-          <Row>
-            <Col sm='12' md={{ size: 6, offset: 3 }}>
-              <Row>
-                <Col sm={{ size: 'auto', offset: 1 }}>
+          <IonRow>
+            <IonCol sm='12' md={{ size: 6, offset: 3 }}>
+              <IonRow>
+                <IonCol sm={{ size: 'auto', offset: 1 }}>
                   {t('copyright')} &copy; {new Date().getFullYear()}{' '}
                   <a href='https://hatecrimetracker.1thing.org'>
                     {' '}
                     {t('website.name')}{' '}
                   </a>
-                </Col>
-                <Col sm={{ size: 'auto', offset: 1 }}>
+                </IonCol>
+                <IonCol sm={{ size: 'auto', offset: 1 }}>
                   <a
                     href='https://docs.google.com/forms/d/1pWp89Y6EThMHml1jYGkDj5J0YFO74K_37sIlOHKkWo0'
                     target='_blank'
@@ -390,10 +430,10 @@ const Home = () => {
                   >
                     {t('contact_us')}
                   </a>
-                </Col>
-              </Row>
-            </Col>
-          </Row>
+                </IonCol>
+              </IonRow>
+            </IonCol>
+          </IonRow>
           <div className='disclaimer'>
             {t('disclaimer.title')}:
             <ul>

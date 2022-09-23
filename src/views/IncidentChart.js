@@ -9,6 +9,30 @@ import { useTranslation } from 'react-i18next';
 import { Trans } from 'react-i18next';
 import { th } from 'date-fns/locale'
 
+import {
+    IonApp,
+    IonAlert,
+    IonCol,
+    IonContent,
+    IonGrid,
+    IonHeader,
+    IonInput,
+    IonItem,
+    IonLabel,
+    IonRow,
+    IonTitle,
+    IonToolbar,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    setupIonicReact,
+  } from "@ionic/react";
+
+  /* Core CSS required for Ionic components to work properly */
+import "@ionic/react/css/core.css";
+
+
 am4core.useTheme(am4themes_animated)
 
 /*
@@ -105,19 +129,19 @@ const IncidentChart = ({color, chart_data, state, isFirstLoadData}) => {
     
     return (
         <div>
-            <Card>
-                <CardHeader>
-                    <div>
-                        <CardTitle tag='h4'>
+            <IonCard color='dark'>
+                <IonCardHeader>
+                    {/* <div> */}
+                        <IonCardTitle tag='h4'>
                             {t("incident_chart.trend")}&nbsp;-&nbsp;
                             {(totalCases > 0) ? t("incident_chart.total_cases", { count: totalCases })
                             : t("incident_chart.no_data")
                             }
                             {state ? " : " + stateFullName(state) : ""}
-                        </CardTitle>
-                    </div>
-                </CardHeader>
-                <CardBody>
+                        </IonCardTitle>
+                    {/* </div> */}
+                </IonCardHeader>
+                <IonCardContent className='item item-text-wrap'>
                 <div className='recharts-wrapper'>
                     {(totalCases === 0 && !isFirstLoadData) ?  (
                         <>
@@ -131,10 +155,10 @@ const IncidentChart = ({color, chart_data, state, isFirstLoadData}) => {
                         <div className='drop-down'/>
                         </>
                     ) : null}
-                    <div id='chart_1yaxis' style={{ width: '100%', height: '400px' }}></div>
+                    <div id='chart_1yaxis' style={{ width: '100%', height: '100%' }}></div>
                 </div>
-                </CardBody>
-            </Card>
+                </IonCardContent>
+            </IonCard>
         </div>
     )
 }
